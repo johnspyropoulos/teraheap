@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "cstdint": "cpp",
+        "*.tcc": "cpp",
+        "array": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "string_view": "cpp",
+        "format": "cpp",
+        "initializer_list": "cpp",
+        "span": "cpp",
+        "limits": "cpp",
+        "ostream": "cpp"
+    }
+}

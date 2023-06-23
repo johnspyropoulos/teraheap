@@ -1,0 +1,5 @@
+Flags: -Xmx${MAX}g -XX:+UseParallelGC -XX:ParallelGCThreads=${PARALLEL_GC_THREADS} -XX:-UseParallelOldGC
+
+-XX:+FreePhysicalDRAM
+
+Make java test files and test
