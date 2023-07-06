@@ -3149,8 +3149,9 @@ struct bitmask* os::Linux::_numa_all_nodes_ptr;
 struct bitmask* os::Linux::_numa_nodes_ptr;
 
 bool os::my_pd_uncommit_memory(char* addr, size_t size) {
+  fprintf(stderr, "Called my_pd_uncommit_memory\n");
   if (madvise(addr, size, MADV_FREE))
-    debug_only(warning("madvise MADV_FREE failed"));
+    fprintf(stderr, "MADVISE FREE FAILED\n");
 
   uintptr_t res = (uintptr_t) ::mmap(addr, size, PROT_NONE,
                 MAP_PRIVATE|MAP_FIXED|MAP_NORESERVE|MAP_ANONYMOUS, -1, 0);

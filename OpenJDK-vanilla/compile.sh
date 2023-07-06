@@ -30,8 +30,8 @@ BGREEN=${ESC}${BOLD}';'${GREEN_FG}'m'
 BYELLOW=${ESC}${BOLD}';'${YELLOW_FG}'m'
 RESET=${ESC}${NORMAL}'m'
 
-CC=gcc-8
-CXX=g++-8
+CC=gcc
+CXX=g++
 
 function usage()
 {
@@ -56,7 +56,7 @@ function release()
   make dist-clean
   CC=$CC CXX=$CXX \
   bash ./configure \
-    --with-jobs=4 \
+    --with-jobs=32 \
     --disable-debug-symbols \
     --with-extra-cflags='-O3' \
     --with-extra-cxxflags='-O3' \
@@ -87,7 +87,7 @@ export_env_vars()
 {
 	local PROJECT_DIR="$(pwd)/../"
 
-	export JAVA_HOME="/usr/lib/jvm/java-8-openjdk"
+	export JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk"
 }
 
 while getopts ":drcmh" opt

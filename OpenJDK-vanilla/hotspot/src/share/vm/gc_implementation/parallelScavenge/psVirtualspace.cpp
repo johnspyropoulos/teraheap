@@ -133,6 +133,8 @@ bool PSVirtualSpace::shrink_by(size_t bytes) {
 }
 
 bool PSVirtualSpace::younggen_shrink_by(size_t bytes) {
+  fprintf(stderr, "Called younggen_shrink_by\n");
+
   assert(is_aligned(bytes), "arg not aligned");
   DEBUG_ONLY(PSVirtualSpaceVerifier this_verifier(this));
 
@@ -150,6 +152,8 @@ bool PSVirtualSpace::younggen_shrink_by(size_t bytes) {
 }
 
 bool PSVirtualSpace::oldgen_shrink_by(size_t bytes) {
+  fprintf(stderr, "Called oldgen_shrink_by\n");
+
   assert(is_aligned(bytes), "arg not aligned");
   DEBUG_ONLY(PSVirtualSpaceVerifier this_verifier(this));
 

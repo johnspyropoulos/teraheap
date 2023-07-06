@@ -1554,6 +1554,8 @@ bool os::uncommit_memory(char* addr, size_t bytes) {
 }
 
 bool os::younggen_uncommit_memory(char* addr, size_t bytes) {
+  fprintf(stderr, "Called younggen_uncommit_memory\n");
+  
   if (!FreePhysicalDRAM && !FreeYoungGen)
     return uncommit_memory(addr, bytes);
 
@@ -1571,6 +1573,8 @@ bool os::younggen_uncommit_memory(char* addr, size_t bytes) {
 }
 
 bool os::oldgen_uncommit_memory(char* addr, size_t bytes) {
+  fprintf(stderr, "Called oldgen_uncommit_memory\n");
+
   if (!FreePhysicalDRAM && !FreeOldGen)
     return uncommit_memory(addr, bytes);
 
