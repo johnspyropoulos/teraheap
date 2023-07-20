@@ -370,11 +370,19 @@ void PSOldGen::resize(size_t desired_free_space) {
   if (new_size > current_size) {
     size_t change_bytes = new_size - current_size;
     expand(change_bytes);
+    
+    fplog_or_tty->stamp();
+    fplog_or_tty->print_cr(" Expanding old generation heap by %lu bytes\n", change_bytes);
+    fplog_or_tty->flush();
   } else {
     size_t change_bytes = current_size - new_size;
     // shrink doesn't grab this lock, expand does. Is that right?
     MutexLocker x(ExpandHeap_lock);
     shrink(change_bytes);
+
+    fplog_or_tty->stamp();
+    fplog_or_tty->print_cr(" Shrinking old generation heap by %lu bytes\n", change_bytes);
+    fplog_or_tty->flush();
   }
 
   if (PrintAdaptiveSizePolicy) {

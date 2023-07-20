@@ -128,6 +128,8 @@ class outputStream : public ResourceObj {
 // ANSI C++ name collision
 extern outputStream* tty;           // tty output
 extern outputStream* gclog_or_tty;  // stream for gc log if -Xloggc:<f>, or tty
+//FPLOG
+extern outputStream* fplog_or_tty;   // stream for gc log if -Xlogfc:<f>, or tty
 
 class streamIndentor : public StackObj {
  private:
@@ -257,6 +259,20 @@ class gcLogFileStream : public fileStream {
              ((GCLogFileSize != 0) && ((uintx)_bytes_written >= GCLogFileSize));
   }
 
+};
+
+//FPLOG
+class fpLogFileStream : public fileStream {
+	protected:
+		const char* _file_name;
+		jlong _bytes_written;
+		uintx _cur_file_num;	// current logfile rotation number
+	public:
+		fpLogFileStream(const char* filename);
+		~fpLogFileStream();
+		virtual void write(const char *c, size_t len);
+    virtual void rotate_log(bool force, outputStream* out = NULL);
+		void dump_logth_header();
 };
 
 #ifndef PRODUCT

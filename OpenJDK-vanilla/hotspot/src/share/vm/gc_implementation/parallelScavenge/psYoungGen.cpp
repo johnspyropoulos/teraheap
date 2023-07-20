@@ -318,6 +318,11 @@ bool PSYoungGen::resize_generation(size_t eden_size, size_t survivor_size) {
       MemRegion mangle_region(prev_high, new_high);
       SpaceMangler::mangle_region(mangle_region);
     }
+
+    fplog_or_tty->stamp();
+    fplog_or_tty->print_cr(" Expanding young generation heap by %lu bytes\n", change);
+    fplog_or_tty->flush();
+
     size_changed = true;
   } else if (desired_size < orig_size) {
     size_t desired_change = orig_size - desired_size;
@@ -328,6 +333,10 @@ bool PSYoungGen::resize_generation(size_t eden_size, size_t survivor_size) {
     if (desired_change > 0) {
       virtual_space()->younggen_shrink_by(desired_change);
       reset_survivors_after_shrink();
+
+      fplog_or_tty->stamp();
+      fplog_or_tty->print_cr(" Shrinking young generation heap by %lu bytes\n", desired_change);
+      fplog_or_tty->flush();
 
       size_changed = true;
     }

@@ -105,6 +105,8 @@ int     Arguments::_num_jvm_args                = 0;
 char*  Arguments::_java_command                 = NULL;
 SystemProperty* Arguments::_system_properties   = NULL;
 const char*  Arguments::_gc_log_filename        = NULL;
+//FPLOG
+const char* Arguments::_fp_log_filename         = NULL;
 bool   Arguments::_has_profile                  = false;
 size_t Arguments::_conservative_max_heap_alignment = 0;
 uintx  Arguments::_min_heap_size                = 0;
@@ -3236,6 +3238,8 @@ jint Arguments::parse_each_vm_init_arg(const JavaVMInitArgs* args,
       FLAG_SET_CMDLINE(bool, PrintGC, true);
       FLAG_SET_CMDLINE(bool, PrintGCTimeStamps, true);
 
+    } else if (match_option(option, "-Xlogfc:", &tail)) {
+      _fp_log_filename = strdup(tail);
     // JNI hooks
     } else if (match_option(option, "-Xcheck", &tail)) {
       if (!strcmp(tail, ":jni")) {

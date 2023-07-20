@@ -228,8 +228,14 @@ bool PSScavenge::invoke() {
 
   PSAdaptiveSizePolicy* policy = heap->size_policy();
   IsGCActiveMark mark;
-
+  
+  fplog_or_tty->stamp();
+  fplog_or_tty->print_cr(" Start minor GC.\n");
+  fplog_or_tty->flush();
   const bool scavenge_done = PSScavenge::invoke_no_policy();
+  fplog_or_tty->stamp();
+  fplog_or_tty->print_cr(" End minor GC.\n");
+  fplog_or_tty->flush();
   const bool need_full_gc = !scavenge_done ||
     policy->should_full_GC(heap->old_gen()->free_in_bytes());
   bool full_gc_done = false;
@@ -244,11 +250,17 @@ bool PSScavenge::invoke() {
     GCCauseSetter gccs(heap, GCCause::_adaptive_size_policy);
     CollectorPolicy* cp = heap->collector_policy();
     const bool clear_all_softrefs = cp->should_clear_all_soft_refs();
-
+    
     if (UseParallelOldGC) {
       full_gc_done = PSParallelCompact::invoke_no_policy(clear_all_softrefs);
     } else {
+      fplog_or_tty->stamp();
+      fplog_or_tty->print_cr(" Start full GC.\n");
+      fplog_or_tty->flush();
       full_gc_done = PSMarkSweep::invoke_no_policy(clear_all_softrefs);
+      fplog_or_tty->stamp();
+      fplog_or_tty->print_cr(" End full GC.\n");
+      fplog_or_tty->flush();
     }
   }
 

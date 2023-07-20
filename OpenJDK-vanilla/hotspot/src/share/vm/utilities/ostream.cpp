@@ -376,6 +376,8 @@ stringStream::~stringStream() {}
 xmlStream*   xtty;
 outputStream* tty;
 outputStream* gclog_or_tty;
+//FPLOG
+outputStream* fplog_or_tty;
 CDS_ONLY(fileStream* classlist_file;) // Only dump the classes that can be stored into the CDS archive
 extern Mutex* tty_lock;
 
@@ -1012,6 +1014,58 @@ void gcLogFileStream::rotate_log_impl(bool force, outputStream* out) {
   }
 }
 
+//FPLOG
+// dump vm version, os version, platform info, build id,
+// memory usage and command line flags into header
+void fpLogFileStream::dump_logth_header() {
+  if (is_open()) {
+    print_cr("%s", Abstract_VM_Version::internal_vm_info_string());
+    os::print_memory_info(this);
+    print("CommandLine flags: ");
+    CommandLineFlags::printSetFlags(this);
+  }
+}
+
+fpLogFileStream::~fpLogFileStream() {
+  if (_file != NULL) {
+    if (_need_close) fclose(_file);
+    _file = NULL;
+  }
+  if (_file_name != NULL) {
+    FREE_C_HEAP_ARRAY(char, _file_name, mtInternal);
+    _file_name = NULL;
+  }
+}
+
+fpLogFileStream::fpLogFileStream(const char* file_name) {
+  _cur_file_num = 0;
+  _bytes_written = 0L;
+  _file_name = make_log_name(file_name, NULL);
+
+  _file = fopen(_file_name, "w");
+
+  if (_file != NULL) {
+    _need_close = true;
+    dump_logth_header();
+  } else {
+    warning("Cannot open file %s due to %s\n", _file_name, strerror(errno));
+    _need_close = false;
+  }
+}
+
+void fpLogFileStream::write(const char* s, size_t len) {
+  if (_file != NULL) {
+    size_t count = fwrite(s, 1, len, _file);
+    _bytes_written += count;
+  }
+  update_position(s, len);
+}
+
+// XX TODO Complete this function later
+void fpLogFileStream::rotate_log(bool force, outputStream* out) {
+	return;
+}
+
 defaultStream* defaultStream::instance = NULL;
 int defaultStream::_output_fd = 1;
 int defaultStream::_error_fd  = 2;
@@ -1349,6 +1403,10 @@ void ostream_init_log() {
   // Note : this must be called AFTER ostream_init()
 
   gclog_or_tty = tty; // default to tty
+
+  //FPLOG
+  fplog_or_tty = tty; // default to tty
+
   if (Arguments::gc_log_filename() != NULL) {
     fileStream * gclog  = new(ResourceObj::C_HEAP, mtInternal)
                              gcLogFileStream(Arguments::gc_log_filename());
@@ -1358,6 +1416,19 @@ void ostream_init_log() {
       gclog->time_stamp().update_to(tty->time_stamp().ticks());
     }
     gclog_or_tty = gclog;
+  }
+
+  //FPLOG
+  if (Arguments::fp_log_filename() != NULL) {
+	  fileStream *fplog = new(ResourceObj::C_HEAP, mtInternal)
+								fpLogFileStream(Arguments::fp_log_filename());
+
+	  if (fplog->is_open()) {
+		  // now we update the time stamp of the TC log to be synced up with tty
+		  fplog->time_stamp().update_to(tty->time_stamp().ticks());
+	  }
+
+	  fplog_or_tty = fplog;
   }
 
 #if INCLUDE_CDS
@@ -1390,6 +1461,12 @@ void ostream_exit() {
   if (gclog_or_tty != tty) {
       delete gclog_or_tty;
   }
+
+  //FPLOG
+  if (fplog_or_tty != tty) {
+    delete fplog_or_tty;
+  }
+
   {
       // we temporaly disable PrintMallocFree here
       // as otherwise it'll lead to using of almost deleted
@@ -1406,6 +1483,8 @@ void ostream_exit() {
   tty = NULL;
   xtty = NULL;
   gclog_or_tty = NULL;
+  //FPLOG
+  fplog_or_tty = NULL;
   defaultStream::instance = NULL;
 }
 
@@ -1413,6 +1492,10 @@ void ostream_exit() {
 void ostream_abort() {
   // Here we can't delete gclog_or_tty and tty, just flush their output
   if (gclog_or_tty) gclog_or_tty->flush();
+
+  //FPLOG
+  if (fplog_or_tty) fplog_or_tty->flush();
+
   if (tty) tty->flush();
 
   if (defaultStream::instance != NULL) {
